@@ -39,7 +39,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing Python dependencies...'
+                echo 'Installing dependencies...'
                 sh '''
                     . venv/bin/activate
                     python3 -m pip install --no-cache-dir -r requirements.txt
@@ -62,6 +62,17 @@ pipeline {
                 echo 'Building Docker image...'
                 sh "docker build -t ${APP_NAME}:${BUILD_NUMBER} ."
                 sh 'docker images'
+            }
+        }
+
+        stage('Security Scan') {
+            steps {                
+                echo 'Scanning Docker image for vulnerabilities...'
+                sh """
+                    trivy image --severity HIGH,CRITICAL ${APP_NAME}:${BUILD_NUMBER}
+                    # Exit if there are HIGH or CRITICAL vulnerabilities
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${APP_NAME}:${BUILD_NUMBER} || true
+                """
             }
         }
     }
