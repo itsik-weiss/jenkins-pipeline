@@ -23,6 +23,18 @@ pipeline {
             }
         }
 
+        stage('Install Dependencies') {
+            steps {
+                sh 'python3 -m pip install --user -r requirements.txt'
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                sh 'python3 simple_test.py'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building Docker image...'
