@@ -15,7 +15,8 @@ pipeline {
         stage('git clone') {
             steps {
                 echo 'Cloning the weather app repository...'
-                sh 'git clone https://github.com/itsik-weiss/weather-app.git'
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']],
+                    userRemoteConfigs: [[url: 'https://github.com/itsik-weiss/weather-app.git']]])
                 sh 'pwd'
                 sh 'ls'
                 sh 'cd weather-app && git checkout main'
