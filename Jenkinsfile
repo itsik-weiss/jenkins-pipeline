@@ -29,7 +29,9 @@ pipeline {
                 sh '''
                     python3 --version
                     apt-get update
-                    apt-get install -y python3-pip
+                    apt-get install -y python3-venv python3-pip
+                    python3 -m venv venv
+                    . venv/bin/activate
                     python3 -m pip install --upgrade pip
                 '''
             }
@@ -39,6 +41,7 @@ pipeline {
             steps {
                 echo 'Installing Python dependencies...'
                 sh '''
+                    . venv/bin/activate
                     python3 -m pip install --no-cache-dir -r requirements.txt
                 '''
             }
@@ -47,7 +50,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running tests...'
-                sh 'python3 simple_test.py'
+                sh '''
+                    . venv/bin/activate
+                    python3 simple_test.py
+                '''
             }
         }
 
