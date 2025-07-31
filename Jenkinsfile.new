@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+    
+    environment {
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        APP_NAME = "weather-app"
+    }
+    
+    options {
+        timeout(time: 1, unit: 'HOURS')
+        disableConcurrentBuilds()
+    }
+    
+    stages {
+        stage('git clone') {
+            steps {
+                echo 'Cloning the weather app repository...'
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']],
+                    userRemoteConfigs: [[url: 'https://github.com/itsik-weiss/weather-app.git']]])
+                sh 'pwd'
+                sh 'ls'
+                echo 'Repository cloned successfully!'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Building the application...'
+                sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .'
+                echo 'Build completed successfully!'
+                sh 'docker images'
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+            cleanWs()
+        }
+        
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        
+        failure {
+            echo 'Pipeline failed!'
+        }
+        
+        unstable {
+            echo 'Pipeline is unstable!'
+        }
+        
+        aborted {
+            echo 'Pipeline was aborted!'
+        }
+    }
+}
