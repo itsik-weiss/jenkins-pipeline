@@ -23,14 +23,30 @@ pipeline {
             }
         }
 
+        stage('Setup Python') {
+            steps {
+                echo 'Setting up Python environment...'
+                sh '''
+                    python3 --version
+                    apt-get update
+                    apt-get install -y python3-pip
+                    python3 -m pip install --upgrade pip
+                '''
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                sh 'python3 -m pip install --user -r requirements.txt'
+                echo 'Installing Python dependencies...'
+                sh '''
+                    python3 -m pip install --no-cache-dir -r requirements.txt
+                '''
             }
         }
         
         stage('Run Tests') {
             steps {
+                echo 'Running tests...'
                 sh 'python3 simple_test.py'
             }
         }
