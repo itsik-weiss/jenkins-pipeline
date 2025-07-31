@@ -70,9 +70,26 @@ pipeline {
                 echo 'Scanning Docker image for vulnerabilities...'
                 sh """
                     trivy image --severity HIGH,CRITICAL ${APP_NAME}:${BUILD_NUMBER}
-                    # Exit if there are HIGH or CRITICAL vulnerabilities
                     trivy image --exit-code 1 --severity HIGH,CRITICAL ${APP_NAME}:${BUILD_NUMBER} || true
                 """
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            environment {
+                DOCKER_CREDS = credentials('docker-hub-credentials')
+                DOCKER_REPO = 'itsikweiss1020/weather-app'
+            }
+            steps {
+                echo 'Pushing image to Docker Hub...'
+                sh '''
+                    echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin
+                    docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKER_REPO}:${BUILD_NUMBER}
+                    docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKER_REPO}:latest
+                    docker push ${DOCKER_REPO}:${BUILD_NUMBER}
+                    docker push ${DOCKER_REPO}:latest
+                    docker logout
+                '''
             }
         }
     }
