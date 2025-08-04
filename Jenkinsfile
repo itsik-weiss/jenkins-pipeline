@@ -4,6 +4,7 @@ pipeline {
     environment {
         BUILD_NUMBER = "${env.BUILD_NUMBER}"
         APP_NAME = 'weather-app'
+        city_name = ${env.CITY_NAME ?: 'jerusalem'}
     }
 
     options {
@@ -72,6 +73,14 @@ pipeline {
                     trivy image --severity HIGH,CRITICAL ${APP_NAME}:${BUILD_NUMBER}
                     trivy image --exit-code 1 --severity HIGH,CRITICAL ${APP_NAME}:${BUILD_NUMBER} || true
                 """
+            }
+        }
+
+        stage('docker run') {
+            steps {
+                echo 'Running Docker container...'
+                sh "docker run -e CITY_NAME=${city_name} -d -p 5000:5000 --name ${APP_NAME} ${APP_NAME}:${BUILD_NUMBER}"
+                echo 'Container is running!'
             }
         }
 
