@@ -4,7 +4,7 @@ pipeline {
     environment {
         BUILD_NUMBER = "${env.BUILD_NUMBER}"
         APP_NAME = 'weather-app'
-        city_name = ${env.CITY_NAME ?: 'jerusalem'}
+        city_name = "${env.CITY_NAME ?: 'jerusalem'}"
     }
 
     options {
